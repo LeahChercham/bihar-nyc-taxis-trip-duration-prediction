@@ -1,0 +1,5 @@
+paths:
+  db_path: ./data/tripduration.db
+  model_path: ./models/tripduration.model
+ml:
+  random_state: 42

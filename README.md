@@ -2,13 +2,22 @@
 
 This repo contains the prediction model for the trip duration in NYC created in the context of the Big Data and AI Studies at ESTIA in Bidart (France)
 
+# Done: 
+
+Added original Notebook
+Created requirements file based on other project
+Created venv following this tutorial: https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html#python_create_virtual_env
+* To activate venv type in terminal: venv/Scripts/activate
+* To deactivate venv type in terminal: deactivate
+Installed dependencies to venv using in terminal : pip install -r requirements.txt
+Created config files in ini and yml
+
+
+
 ## Next To Do's
 
 ### Hands on 1
-Objective: save model to be used 
-- Create virtual environment venv
-- Create config file
-- get Notebook python code
+Objective: save model to be used
 - Separate logic
   - Develop python modules for preprocessing
   - for training logic
