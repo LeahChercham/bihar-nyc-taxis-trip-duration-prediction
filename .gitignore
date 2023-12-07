@@ -162,3 +162,5 @@ cython_debug/
 # data
 data/
 ./data
+
+data/New_York_City_Taxi_Trip_Duration.csv
