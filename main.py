@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI, Path
 from pydantic import BaseModel, PrivateAttr, Field, PositiveFloat, computed_field
 import pandas as pd
+from datetime import datetime
 
 import commun
 
@@ -28,8 +29,8 @@ def predict(data):
 
 class Trip(BaseModel):
     vendor_id: int
-    pickup_datetime: str
-    dropoff_datetime: str
+    pickup_datetime: datetime
+    dropoff_datetime: datetime
     passenger_count: int
     pickup_longitude: float
     pickup_latitude: float
