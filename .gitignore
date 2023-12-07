@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 
 # data
-data\New_York_City_Taxi_Trip_Duration.csv
+data/
