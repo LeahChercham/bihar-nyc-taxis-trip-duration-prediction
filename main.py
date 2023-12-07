@@ -3,6 +3,7 @@ from fastapi import FastAPI, Path
 from pydantic import BaseModel, PrivateAttr, Field, PositiveFloat, computed_field
 import pandas as pd
 from datetime import datetime
+from typing import List
 
 import commun
 
@@ -16,7 +17,7 @@ def load_data(path):
 
 
 def predict(data):
-    print("making perdictions")
+    print("making predictions")
     data = commun.preprocess_data(data)
     column_transformer, feature_names = commun.load_column_transformer(commun.COLUMN_TRANSFORMER_PATH)
     model = commun.load_model(commun.MODEL_PATH)
@@ -25,6 +26,7 @@ def predict(data):
 
     y_pred = model.predict(data_transformed)
     y_pred = commun.postprocess_target(y_pred)
+    y_pred = pd.DataFrame(y_pred)
     return y_pred
 
 
@@ -53,16 +55,24 @@ def read_trips(count: int = Path(..., title="The number of trips to retrieve")):
     return {"trips": trips[:count]}
 
 @app.post("/trips/create")
-def create_trip(trip:Trip):
+def create_trip(trips_data: List[Trip]):
     print("in api app post trips/create")
-    trip_data = pd.DataFrame([trip.dict()])
-    print('tripdata: ', trip_data)
-    predictions = predict(trip_data)
-    print('predictions: ', predictions)
-    return {"trip_created" : trip.dict(),
-            "prediction" : predictions}
+    trips_data_df = pd.DataFrame([trip.dict() for trip in trips_data])
+
+    print('tripdata: ', trips_data_df)
+
+    # Make predictions for all trips
+    predictions_df = predict(trips_data_df)
+
+    # Concatenate predictions with the original trip data
+    result_df = pd.concat([trips_data_df, predictions_df], axis=1)
+
+    # Convert the result DataFrame to a list of dictionaries
+    result_list = result_df.to_dict(orient='records')
+    return result_list
 
 
 if(__name__) == '__main__':
     uvicorn.run("main:app", host = "O.O.O.O", port=5000, reload=True)
+
 

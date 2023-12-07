@@ -25,9 +25,12 @@ def fit_model(X, y):
     model = LinearRegression()
     model.fit(X, y)
     y_pred = model.predict(X)
-    # y_pred = commun.postprocess_target(y_pred) # because we log in preprocessing
-    score = mean_squared_error(y, y_pred, squared=False)
-    print(f"Score on train data in seconds {score:.2f} OR in minutes: {score%60}")
+    y_pred = commun.postprocess_target(y_pred) # because we log in preprocessing
+    y = commun.postprocess_target(y)
+    score = mean_squared_error(y, y_pred, squared=False) # squared false for RMSE - in seconds
+    whole_minutes = score // 60
+    remaining_seconds = score % 60
+    print(f"Score on data in seconds {score:.2f} OR in minutes: {whole_minutes} min and {remaining_seconds} seconds ")
     return model
 
 
@@ -42,7 +45,7 @@ def fit_column_transformer(X, num_features, cat_features):
 
     column_transformer.fit(X[num_features + cat_features])
     feature_names = column_transformer.get_feature_names_out()
-    print(f"feature_names {feature_names}")
+
     return column_transformer, feature_names
 
 

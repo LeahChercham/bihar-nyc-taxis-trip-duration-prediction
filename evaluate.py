@@ -17,8 +17,13 @@ def evaluate_model(model, X, y):
     print(f"Evaluating the model")
     y_pred = model.predict(X)
     y_pred = commun.postprocess_target(y_pred)
-    # y = commun.postprocess_target(y)
+    y = commun.postprocess_target(y)
     score = mean_squared_error(y, y_pred, squared=False)
+    whole_minutes = score // 60
+    remaining_seconds = score % 60
+    print(
+        f"Score on test data in seconds {score:.2f} OR in minutes: {whole_minutes} min and {remaining_seconds} seconds ")
+
     return score
 
 
@@ -34,4 +39,6 @@ if __name__ == "__main__":
 
     y_test = commun.preprocess_target(y_test)
     score_test = evaluate_model(model, X_test_transformed, y_test)
-    print(f"Score on test data in seconds: {score_test:.2f} OR in minutes: {score_test%60}")
+    whole_minutes = score_test // 60
+    remaining_seconds = score_test % 60
+    print(f"Score on test data in seconds: {score_test:.2f} OR in minutes: {whole_minutes} min and {remaining_seconds} seconds")

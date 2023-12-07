@@ -63,13 +63,9 @@ def preprocess_data(X):
     return X
 
 
-def transform_target(y):
-    # Log1p permet de normaliser les données!
-    return np.log1p(y)
-
 
 def preprocess_target(y):
-    y = transform_target(y)
+    y = np.log1p(y)
     return y
 
 
