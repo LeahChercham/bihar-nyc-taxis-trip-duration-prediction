@@ -8,6 +8,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 import commun
 
+
 def load_train_data(path):
     print(f"Reading train data from csv: {path}")
     data_train = pd.read_csv(path)
@@ -15,11 +16,9 @@ def load_train_data(path):
     y = data_train['trip_duration']
     return X, y
 
+
 def fit_model(X, y):
     print(f"Fitting a model")
-    
-    # remove outliers for the training data
-    X, y = commun.step4_remove_outliers(X, y)
     
     model = LinearRegression()
     model.fit(X, y)
@@ -27,6 +26,7 @@ def fit_model(X, y):
     score = mean_squared_error(y, y_pred)
     print(f"Score on train data {score:.2f}")
     return model
+
 
 def fit_column_transformer(X):
     print(f"Fitting the column transformer")
@@ -40,19 +40,25 @@ def fit_column_transformer(X):
     ])
 
     column_transformer.fit(X[num_features + cat_features])
-    return column_transformer
+    feature_names = column_transformer.get_feature_names_out()
+    print(f"feature_names {feature_names}")
+    return column_transformer, feature_names
 
 
 if __name__ == "__main__":
     X_train, y_train = load_train_data(commun.DB_PATH)
     X_train = commun.preprocess_data(X_train)
-    
+
+    # remove outliers for the training data
+    X_train, y_train = commun.step4_remove_outliers(X_train, y_train )
+
     # fit and persist the column transformer
-    ct = fit_column_transformer(X_train)
-    commun.perist_column_transformer(ct, commun.COLUMN_TRANSFORMER_PATH)
+    ct, feature_names = fit_column_transformer(X_train)
+    commun.persist_column_transformer(ct, commun.COLUMN_TRANSFORMER_PATH)
     
-    #Apply the fitted column transformer to X_train
-    X_train_transformed = ct.transform(X_train)
+    # Apply the fitted column transformer to X_train
+    # X_train_transformed = ct.transform(X_train)
+    X_train_transformed = pd.DataFrame(ct.transform(X_train), columns=feature_names)
     
     model = fit_model(X_train_transformed, y_train)
     commun.persist_model(model, commun.MODEL_PATH)

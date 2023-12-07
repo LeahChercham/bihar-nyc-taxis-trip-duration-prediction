@@ -1,15 +1,17 @@
 import pickle
 import os
+import pandas as pd
+import numpy as np
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+# Using INI configuration file
+from configparser import ConfigParser
 
 # project root
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT_DIR, 'config.ini')
 
-# Using INI configuration file
-from configparser import ConfigParser
 
 config = ConfigParser()
 config.read(CONFIG_PATH)
@@ -39,7 +41,7 @@ def preprocess_data(X):
     X = X.drop(columns=['id', 'dropoff_datetime'])
     # changing to datetime
     X['pickup_datetime'] = pd.to_datetime(X['pickup_datetime'])
-    #TODO: do i need to split here ? 
+    # TODO: do i need to split here ?
     X = step1_add_features(X)
     X = step2_add_features(X)
     X = step3_process_features(X)
@@ -57,8 +59,7 @@ def persist_model(model, path):
     with open(path, "wb") as file:
         pickle.dump(model, file)
     print(f"Done")
-    
-    
+
 
 def load_model(path):
     print(f"Loading the model from {path}")
@@ -79,27 +80,32 @@ def haversine_array(lat1, lng1, lat2, lng2):
 
 
 def is_high_traffic_trip(X):
-  return ((X['hour'] >= 8) & (X['hour'] <= 19) & (X['weekday'] >= 0) & (X['weekday'] <= 4)) | \
+    return ((X['hour'] >= 8) & (X['hour'] <= 19) & (X['weekday'] >= 0) & (X['weekday'] <= 4)) | \
          ((X['hour'] >= 13) & (X['hour'] <= 20) & (X['weekday'] == 5))
+
 
 def is_high_speed_trip(X):
   return ((X['hour'] >= 2) & (X['hour'] <= 5) & (X['weekday'] >= 0) & (X['weekday'] <= 4)) | \
          ((X['hour'] >= 4) & (X['hour'] <= 7) & (X['weekday'] >= 5) & (X['weekday'] <= 6))
 
+
 def is_rare_point(X, latitude_column, longitude_column, qmin_lat, qmax_lat, qmin_lon, qmax_lon):
-  lat_min = X[latitude_column].quantile(qmin_lat)
-  lat_max = X[latitude_column].quantile(qmax_lat)
-  lon_min = X[longitude_column].quantile(qmin_lon)
-  lon_max = X[longitude_column].quantile(qmax_lon)
+    lat_min = X[latitude_column].quantile(qmin_lat)
+    lat_max = X[latitude_column].quantile(qmax_lat)
+    lon_min = X[longitude_column].quantile(qmin_lon)
+    lon_max = X[longitude_column].quantile(qmax_lon)
 
-  res = (X[latitude_column] < lat_min) | (X[latitude_column] > lat_max) | \
-        (X[longitude_column] < lon_min) | (X[longitude_column] > lon_max)
-  return res
-
+    res = (X[latitude_column] < lat_min) | (X[latitude_column] > lat_max) | (X[longitude_column] < lon_min) | (X[longitude_column] > lon_max)
+    return res
 
 
 def step1_add_features(X):
   res = X.copy()
+  res['pickup_date'] = res['pickup_datetime'].dt.date
+
+  df_abnormal_dates = res.groupby('pickup_date').size()
+  abnormal_dates = df_abnormal_dates[df_abnormal_dates < df_abnormal_dates.quantile(0.02)]
+
   res['weekday'] = res['pickup_datetime'].dt.weekday
   res['month'] = res['pickup_datetime'].dt.month
   res['hour'] = res['pickup_datetime'].dt.hour
@@ -128,34 +134,44 @@ def step3_process_features(X):
   return res
 
 
-def step4_remove_outliers(X, y): ##TODO: ask if to do that
-  res = X.copy()
+def step4_remove_outliers(X, y):
+    print(f"Step4: removing outliers")
+    res = X.copy()
+    # print("Shape of res:", res.shape)
+    print("head of res", res.head())
+    # print("Shape of y:", y.shape)
 
-  d = res['log_distance_haversine']
-  d_min = d.quantile(0.01)
-  d_max = d.quantile(0.995)
-  cond_distance = (d > d_min) & (d < d_max)
+    # if 'log_distance_haversine' not in res.columns:
+    #   raise ValueError("Column 'log_distance_haversine' not found in DataFrame.")
 
-  y_min = y.quantile(0.005)
-  y_max = y.quantile(0.995)
-  cond_time = (y > y_min) & (y < y_max)
+    # if not isinstance(y, pd.Series):
+    #   raise ValueError("y should be a pandas Series.")
 
-  cond_non_outliers = cond_distance & cond_time
+    d = res['log_distance_haversine']
+    d_min = d.quantile(0.01)
+    d_max = d.quantile(0.995)
+    cond_distance = (d > d_min) & (d < d_max)
 
-  return X[cond_non_outliers], y[cond_non_outliers]
+    y_min = y.quantile(0.005)
+    y_max = y.quantile(0.995)
+    cond_time = (y > y_min) & (y < y_max)
+
+    cond_non_outliers = cond_distance & cond_time
+
+    return X[cond_non_outliers], y[cond_non_outliers]
 
 
 def encode_weekday(x):
-  if (x == 0): return 0
-  if (x == 5): return 2
-  if (x == 6): return 3
-  return 1
+    if (x == 0): return 0
+    if (x == 5): return 2
+    if (x == 6): return 3
+    return 1
 
 def step5_process_categorical_features(X):
-  res = X.copy()
-  res['weekday'] = res['weekday'].apply(encode_weekday)
+    res = X.copy()
+    res['weekday'] = res['weekday'].apply(encode_weekday)
 
-  return res
+    return res
 
 def persist_column_transformer(column_transformer, path):
     print(f"Persisting the column transformer to {path}")
