@@ -1,5 +1,5 @@
 paths:
-  db_path: ./data/tripduration.db
+  db_path: ./data/tripduration.csv
   model_path: ./models/tripduration.model
 ml:
   random_state: 42
