@@ -16,7 +16,9 @@ def load_test_data(path):
 def evaluate_model(model, X, y):
     print(f"Evaluating the model")
     y_pred = model.predict(X)
-    score = mean_squared_error(y, y_pred)
+    y_pred = commun.postprocess_target(y_pred)
+    # y = commun.postprocess_target(y)
+    score = mean_squared_error(y, y_pred, squared=False)
     return score
 
 
@@ -30,5 +32,6 @@ if __name__ == "__main__":
     # Apply the column transformer to X_test and convert to DataFrame
     X_test_transformed = pd.DataFrame(column_transformer.transform(X_test), columns=feature_names)
 
+    y_test = commun.preprocess_target(y_test)
     score_test = evaluate_model(model, X_test_transformed, y_test)
-    print(f"Score on test data {score_test:.2f}")
+    print(f"Score on test data in seconds: {score_test:.2f} OR in minutes: {score_test%60}")

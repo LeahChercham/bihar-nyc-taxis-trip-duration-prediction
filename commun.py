@@ -29,8 +29,11 @@ COLUMN_TRANSFORMER_PATH = str(config.get("PATHS", "COLUMN_TRANSFORMER_PATH"))
 # with open("config.yml", "r") as f:
 #     config_yaml = yaml.load(f, Loader=yaml.SafeLoader)
 #     DB_PATH = str(config_yaml['paths']['db_path'])
+#     DB_PATH_TRAIN = str(config_yaml['paths']['db_path_train'])
+#     DB_PATH_TEST = str(config_yaml['paths']['db_path_test'])
 #     MODEL_PATH = str(config_yaml['paths']["model_path"])
 #     RANDOM_STATE = int(config_yaml["ml"]["random_state"])
+#     TEST_SIZE = float(config_yaml["ml"]["test_size"])
 #     COLUMN_TRANSFORMER_PATH = str(config_yaml['paths']["column_transformer_path"])
 
 # SQLite requires the absolute path
@@ -40,17 +43,39 @@ DB_PATH = os.path.join(ROOT_DIR, os.path.normpath(DB_PATH))
 
 def preprocess_data(X):
     print(f"Preprocessing data")
+
     # dropping not used columns
-    X = X.drop(columns=['id', 'dropoff_datetime'])
-    # changing to datetime
+    if 'id' in X.columns:
+        X = X.drop(columns=['id'])
+
+    if 'dropoff_datetime' in X.columns:
+        X = X.drop(columns=['dropoff_datetime'])
+
+    # changing string to datetime
     X['pickup_datetime'] = pd.to_datetime(X['pickup_datetime'])
-    # TODO: do i need to split here ?
+
     X = step1_add_features(X)
     X = step2_add_features(X)
     X = step3_process_features(X)
+    X = undo_step3_process_features(X) # because we realized that those variables didn't improve the quality of the model
     # step 4 : removing outliers not here because only happening for the training (see in train.py fit model)
     X = step5_process_categorical_features(X)
     return X
+
+
+def transform_target(y):
+    # Log1p permet de normaliser les données!
+    return np.log1p(y)
+
+
+def preprocess_target(y):
+    y = transform_target(y)
+    return y
+
+
+def postprocess_target(y):
+    y = np.expm1(y)
+    return y
 
 
 def persist_model(model, path):
@@ -129,6 +154,7 @@ def step2_add_features(X):
 
 
 def step3_process_features(X):
+    # this didn't improve the model so I don't use it
   res = X.copy()
   res['vendor_id'] = res['vendor_id'].map({1:0, 2:1})
   res['store_and_fwd_flag'] = res['store_and_fwd_flag'].map({'N':0, 'Y':1})
@@ -137,18 +163,15 @@ def step3_process_features(X):
   return res
 
 
+def undo_step3_process_features(X):
+    res = X.copy()
+    res.drop(columns=['vendor_id', 'store_and_fwd_flag', 'passenger_count'])
+    return res
+
+
 def step4_remove_outliers(X, y):
     print(f"Step4: removing outliers")
     res = X.copy()
-    # print("Shape of res:", res.shape)
-    print("head of res", res.head())
-    # print("Shape of y:", y.shape)
-
-    # if 'log_distance_haversine' not in res.columns:
-    #   raise ValueError("Column 'log_distance_haversine' not found in DataFrame.")
-
-    # if not isinstance(y, pd.Series):
-    #   raise ValueError("y should be a pandas Series.")
 
     d = res['log_distance_haversine']
     d_min = d.quantile(0.01)

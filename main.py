@@ -24,6 +24,7 @@ def predict(data):
     data_transformed = pd.DataFrame(column_transformer.transform(data), columns=feature_names)
 
     y_pred = model.predict(data_transformed)
+    y_pred = commun.postprocess_target(y_pred)
     return y_pred
 
 
@@ -35,7 +36,7 @@ class Trip(BaseModel):
     pickup_longitude: float
     pickup_latitude: float
     dropoff_longitude: float
-    pickup_latitude: float
+    dropoff_latitude: float
     store_and_fwd_flag: str
 
 
@@ -53,8 +54,11 @@ def read_trips(count: int = Path(..., title="The number of trips to retrieve")):
 
 @app.post("/trips/create")
 def create_trip(trip:Trip):
+    print("in api app post trips/create")
     trip_data = pd.DataFrame([trip.dict()])
+    print('tripdata: ', trip_data)
     predictions = predict(trip_data)
+    print('predictions: ', predictions)
     return {"trip_created" : trip.dict(),
             "prediction" : predictions}
 
