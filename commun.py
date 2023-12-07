@@ -1,5 +1,8 @@
 import pickle
 import os
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
 
 # project root
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,6 +16,7 @@ config.read(CONFIG_PATH)
 DB_PATH = str(config.get("PATHS", "DB_PATH"))
 MODEL_PATH = str(config.get("PATHS", "MODEL_PATH"))
 RANDOM_STATE = int(config.get("ML", "RANDOM_STATE"))
+COLUMN_TRANSFORMER_PATH = str(config.get("PATHS", "COLUMN_TRANSFORMER_PATH"))
 
 # # Doing the same with a YAML configuration file
 # import yaml
@@ -22,6 +26,7 @@ RANDOM_STATE = int(config.get("ML", "RANDOM_STATE"))
 #     DB_PATH = str(config_yaml['paths']['db_path'])
 #     MODEL_PATH = str(config_yaml['paths']["model_path"])
 #     RANDOM_STATE = int(config_yaml["ml"]["random_state"])
+#     COLUMN_TRANSFORMER_PATH = str(config_yaml['paths']["column_transformer_path"])
 
 # SQLite requires the absolute path
 # DB_PATH = os.path.abspath(DB_PATH)
@@ -31,16 +36,15 @@ DB_PATH = os.path.join(ROOT_DIR, os.path.normpath(DB_PATH))
 def preprocess_data(X):
     print(f"Preprocessing data")
     # dropping not used columns
-    X = X.drop(columns=['id', 'dropoff_datetime'])    
+    X = X.drop(columns=['id', 'dropoff_datetime'])
     # changing to datetime
-    data['pickup_datetime'] = pd.to_datetime(X['pickup_datetime'])
+    X['pickup_datetime'] = pd.to_datetime(X['pickup_datetime'])
     #TODO: do i need to split here ? 
     X = step1_add_features(X)
     X = step2_add_features(X)
     X = step3_process_features(X)
-    # not sure for step4 remove outliers because it involves y
+    # step 4 : removing outliers not here because only happening for the training (see in train.py fit model)
     X = step5_process_categorical_features(X)
-    X = step6_process_onehotencoding_scaling(X)
     return X
 
 
@@ -153,23 +157,15 @@ def step5_process_categorical_features(X):
 
   return res
 
+def persist_column_transformer(column_transformer, path):
+    print(f"Persisting the column transformer to {path}")
+    with open(path, "wb") as file:
+        pickle.dump(column_transformer, file)
+    print(f"Done")
 
-def step6_process_onehotencoding_scaling(X):
-    res = X.copy()
-    
-    num_features = ['log_distance_haversine', 'hour',
-                'abnormal_period', 'is_high_traffic_trip', 'is_high_speed_trip',
-                'is_rare_pickup_point', 'is_rare_dropoff_point']
-    cat_features = ['weekday', 'month']
-
-    train_features = num_features + cat_features
-
-    column_transformer = ColumnTransformer([
-    ('ohe', OneHotEncoder(handle_unknown="ignore"), cat_features),
-    ('scaling', StandardScaler(), num_features)]
-    
-    res_transformed = column_transformer.fit_transform(res[train_features])
-    return res_transformed
-                                                                          
-)
-    
+def load_column_transformer(path):
+    print(f"Loading the column transformer from {path}")
+    with open(path, "rb") as file:
+        column_transformer = pickle.load(file)
+    print(f"Done")
+    return column_transformer

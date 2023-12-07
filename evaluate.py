@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 
-import common
+import commun
 
 def load_test_data(path):
     print(f"Reading test data from the database: {path}")
@@ -19,8 +19,8 @@ def evaluate_model(model, X, y):
 
 if __name__ == "__main__":
 
-    X_test, y_test = load_test_data(common.DB_PATH)
-    X_test = common.preprocess_data(X_test)
-    model = common.load_model(common.MODEL_PATH)
+    X_test, y_test = load_test_data(commun.DB_PATH)
+    X_test = commun.preprocess_data(X_test)
+    model = commun.load_model(commun.MODEL_PATH)
     score_test = evaluate_model(model, X_test, y_test)
     print(f"Score on test data {score_test:.2f}")

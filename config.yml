@@ -1,5 +1,6 @@
 paths:
   db_path: ./data/tripduration.csv
   model_path: ./models/tripduration.model
+  column_transformer_path: ./models/column_transformer.model
 ml:
   random_state: 42
