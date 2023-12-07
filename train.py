@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     # fit and persist the column transformer
     ct, feature_names = fit_column_transformer(X_train)
-    commun.persist_column_transformer(ct, commun.COLUMN_TRANSFORMER_PATH)
+    commun.persist_column_transformer(ct, feature_names, commun.COLUMN_TRANSFORMER_PATH)
     
     # Apply the fitted column transformer to X_train
     # X_train_transformed = ct.transform(X_train)

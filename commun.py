@@ -173,15 +173,15 @@ def step5_process_categorical_features(X):
 
     return res
 
-def persist_column_transformer(column_transformer, path):
+def persist_column_transformer(column_transformer, feature_names, path):
     print(f"Persisting the column transformer to {path}")
     with open(path, "wb") as file:
-        pickle.dump(column_transformer, file)
+        pickle.dump((column_transformer, feature_names), file)
     print(f"Done")
 
 def load_column_transformer(path):
     print(f"Loading the column transformer from {path}")
     with open(path, "rb") as file:
-        column_transformer = pickle.load(file)
+        column_transformer, feature_names = pickle.load(file)
     print(f"Done")
-    return column_transformer
+    return column_transformer, feature_names
