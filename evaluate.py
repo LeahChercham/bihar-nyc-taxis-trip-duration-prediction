@@ -21,7 +21,7 @@ def evaluate_model(model, X, y):
 
 
 if __name__ == "__main__":
-    X_test, y_test = load_test_data(commun.DB_PATH)
+    X_test, y_test = load_test_data(commun.DB_PATH_TEST)
     X_test = commun.preprocess_data(X_test)
     # add model column transformer
     column_transformer, feature_names = commun.load_column_transformer(commun.COLUMN_TRANSFORMER_PATH)

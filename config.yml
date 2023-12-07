@@ -1,6 +1,9 @@
 paths:
   db_path: ./data/New_York_City_Taxi_Trip_Duration.csv
+  db_path_train: ./data/train_data.csv
+  db_path_test: ./data/test_data.csv
   model_path: ./models/tripduration.model
   column_transformer_path: ./models/column_transformer.model
 ml:
   random_state: 42
+  test_size: 0.3

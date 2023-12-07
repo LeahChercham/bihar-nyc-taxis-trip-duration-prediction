@@ -46,7 +46,7 @@ def fit_column_transformer(X):
 
 
 if __name__ == "__main__":
-    X_train, y_train = load_train_data(commun.DB_PATH)
+    X_train, y_train = load_train_data(commun.DB_PATH_TRAIN)
     X_train = commun.preprocess_data(X_train)
 
     # remove outliers for the training data

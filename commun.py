@@ -16,8 +16,11 @@ CONFIG_PATH = os.path.join(ROOT_DIR, 'config.ini')
 config = ConfigParser()
 config.read(CONFIG_PATH)
 DB_PATH = str(config.get("PATHS", "DB_PATH"))
+DB_PATH_TRAIN = str(config.get("PATHS", "DB_PATH_TRAIN"))
+DB_PATH_TEST = str(config.get("PATHS", "DB_PATH_TEST"))
 MODEL_PATH = str(config.get("PATHS", "MODEL_PATH"))
 RANDOM_STATE = int(config.get("ML", "RANDOM_STATE"))
+TEST_SIZE = float(config.get("ML", "TEST_SIZE"))
 COLUMN_TRANSFORMER_PATH = str(config.get("PATHS", "COLUMN_TRANSFORMER_PATH"))
 
 # # Doing the same with a YAML configuration file
