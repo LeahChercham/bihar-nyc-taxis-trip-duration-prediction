@@ -5,14 +5,6 @@ from sklearn.metrics import mean_squared_error
 import commun
 
 
-def load_test_data(path):
-    print(f"Reading test data from the database: {path}")
-    data_test = pd.read_csv(path)
-    X = data_test.drop(columns=['trip_duration'])
-    y = data_test['trip_duration']
-    return X, y
-
-
 def evaluate_model(model, X, y):
     print(f"Evaluating the model")
     y_pred = model.predict(X)
@@ -28,7 +20,7 @@ def evaluate_model(model, X, y):
 
 
 if __name__ == "__main__":
-    X_test, y_test = load_test_data(commun.DB_PATH_TEST)
+    X_test, y_test = commun.load_data(commun.DB_PATH_TEST)
     X_test = commun.preprocess_data(X_test)
     # add model column transformer
     column_transformer, feature_names = commun.load_column_transformer(commun.COLUMN_TRANSFORMER_PATH)

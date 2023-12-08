@@ -25,7 +25,7 @@ def predict(data):
     data_transformed = pd.DataFrame(column_transformer.transform(data), columns=feature_names)
 
     y_pred = model.predict(data_transformed)
-    y_pred = commun.postprocess_target(y_pred)
+    # y_pred = commun.postprocess_target(y_pred) causing overflow thus deactivated
     y_pred = pd.DataFrame(y_pred)
     return y_pred
 
@@ -70,6 +70,8 @@ def create_trip(trips_data: List[Trip]):
     # Convert the result DataFrame to a list of dictionaries
     result_list = result_df.to_dict(orient='records')
     return result_list
+
+
 
 
 if(__name__) == '__main__':

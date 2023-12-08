@@ -1,0 +1,8 @@
+name: trip-duration-prediction
+conda_env: conda.yml
+
+entry_points:
+  main:
+    parameters:
+      -- to do (see example)
+    command: "python train.py"

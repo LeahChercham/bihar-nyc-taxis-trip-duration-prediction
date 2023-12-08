@@ -12,7 +12,6 @@ from configparser import ConfigParser
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT_DIR, 'config.ini')
 
-
 config = ConfigParser()
 config.read(CONFIG_PATH)
 DB_PATH = str(config.get("PATHS", "DB_PATH"))
@@ -22,23 +21,23 @@ MODEL_PATH = str(config.get("PATHS", "MODEL_PATH"))
 RANDOM_STATE = int(config.get("ML", "RANDOM_STATE"))
 TEST_SIZE = float(config.get("ML", "TEST_SIZE"))
 COLUMN_TRANSFORMER_PATH = str(config.get("PATHS", "COLUMN_TRANSFORMER_PATH"))
+TRACKING_URI = str(config.get("PATHS", "TRACKING_URI"))
+TARGET = str(config.get("ML", "TARGET"))
+DIR_MLRUNS = str(config.get("PATHS", "DIR_MLRUNS"))
+MODEL_NAME = str(config.get("MODELS", "MODEL_NAME"))
+MODEL_VERSION = str(config.get("MODELS", "MODEL_VERSION"))
 
-# # Doing the same with a YAML configuration file
-# import yaml
-#
-# with open("config.yml", "r") as f:
-#     config_yaml = yaml.load(f, Loader=yaml.SafeLoader)
-#     DB_PATH = str(config_yaml['paths']['db_path'])
-#     DB_PATH_TRAIN = str(config_yaml['paths']['db_path_train'])
-#     DB_PATH_TEST = str(config_yaml['paths']['db_path_test'])
-#     MODEL_PATH = str(config_yaml['paths']["model_path"])
-#     RANDOM_STATE = int(config_yaml["ml"]["random_state"])
-#     TEST_SIZE = float(config_yaml["ml"]["test_size"])
-#     COLUMN_TRANSFORMER_PATH = str(config_yaml['paths']["column_transformer_path"])
-
-# SQLite requires the absolute path
-# DB_PATH = os.path.abspath(DB_PATH)
 DB_PATH = os.path.join(ROOT_DIR, os.path.normpath(DB_PATH))
+
+num_features = ['log_distance_haversine',
+                'hour',
+                'abnormal_period',
+                'is_high_traffic_trip',
+                'is_high_speed_trip',
+                'is_rare_pickup_point',
+                'is_rare_dropoff_point']
+
+cat_features = ['weekday', 'month']
 
 
 def preprocess_data(X):
@@ -62,6 +61,13 @@ def preprocess_data(X):
     X = step5_process_categorical_features(X)
     return X
 
+def load_data(path):
+    # Import data
+    print(f"Reading train data from csv: {path}")
+    data = pd.read_csv(path)
+    X = data.drop(columns=['trip_duration'])
+    y = data['trip_duration']
+    return X, y
 
 
 def preprocess_target(y):
