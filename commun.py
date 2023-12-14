@@ -21,7 +21,7 @@ MODEL_PATH = str(config.get("PATHS", "MODEL_PATH"))
 RANDOM_STATE = int(config.get("ML", "RANDOM_STATE"))
 TEST_SIZE = float(config.get("ML", "TEST_SIZE"))
 COLUMN_TRANSFORMER_PATH = str(config.get("PATHS", "COLUMN_TRANSFORMER_PATH"))
-TRACKING_URI = str(config.get("PATHS", "TRACKING_URI"))
+TRACKING_URI = str(config.get("MODELS", "TRACKING_URI"))
 TARGET = str(config.get("ML", "TARGET"))
 DIR_MLRUNS = str(config.get("PATHS", "DIR_MLRUNS"))
 MODEL_NAME = str(config.get("MODELS", "MODEL_NAME"))
@@ -206,6 +206,7 @@ def persist_column_transformer(column_transformer, feature_names, path):
     with open(path, "wb") as file:
         pickle.dump((column_transformer, feature_names), file)
     print(f"Done")
+
 
 def load_column_transformer(path):
     print(f"Loading the column transformer from {path}")

@@ -4,5 +4,6 @@ conda_env: conda.yml
 entry_points:
   main:
     parameters:
-      -- to do (see example)
-    command: "python train.py"
+      alpha: {type: float, default: 0.5}
+      l1_ratio: {type: float, default: 0.1}
+    command: "python train.py {alpha} {l1_ratio}"
