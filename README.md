@@ -7,6 +7,7 @@ This repo contains the prediction model for the trip duration in NYC created in 
 ## Run model
 in terminal: 
 * venv/Scripts/activate
+* pip install -r requirements.txt
 * python data_separation_script.py
 * python train.py
 * python evaluate.py

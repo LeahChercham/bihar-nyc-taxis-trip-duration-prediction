@@ -11,15 +11,15 @@ import evaluate
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 # Set tracking server uri for logging
-mlflow.set_tracking_uri(commun.TRACKING_URI)
+# mlflow.set_tracking_uri(commun.TRACKING_URI)
 
 # Create a new MLflow Experiment
-mlflow.set_experiment("MLflow Taxi Trip Duration")
+# mlflow.set_experiment("MLflow Taxi Trip Duration")
 
 # Loading Data
 def loading_data():
-    X_train, y_train = train.load_data(commun.DB_PATH_TRAIN)
-    X_test, y_test = train.load_data(commun.DB_PATH_TEST)
+    X_train, y_train = commun.load_data(commun.DB_PATH_TRAIN)
+    X_test, y_test = commun.load_data(commun.DB_PATH_TEST)
     return X_train, y_train, X_test, y_test
 
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     X_train, y_train = commun.step4_remove_outliers(X_train, y_train)
 
     # création d'expériment
-    exp_name = "trip_duration_prediction"  # créer expériment avec un nom qui nous plait
+    exp_name = "trip_duration_prediction2"  # créer expériment avec un nom qui nous plait
     experiment_id = mlflow.create_experiment(exp_name)  # récupérer l'id de l'expériment juste créer
     # info: à l'intérieur d'un expériment, il y a des runs, et dans les runs il peut y avoir des nested runs
     mlflow.set_experiment(exp_name)
